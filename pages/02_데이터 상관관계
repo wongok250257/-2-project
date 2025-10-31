@@ -1,0 +1,63 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+st.set_page_config(page_title="📊 데이터 상관관계", page_icon="📊")
+
+st.title("📊 데이터 상관관계 분석 페이지")
+
+# --- 데이터 불러오기 ---
+@st.cache_data
+def load_data():
+    return pd.read_csv("android-games.csv")
+
+df = load_data()
+
+# --- 상관관계 행렬 ---
+st.subheader("📈 상관관계 히트맵")
+
+numeric_df = df.select_dtypes(include=["int64", "float64"])
+
+if not numeric_df.empty:
+    corr = numeric_df.corr(numeric_only=True)
+    fig = px.imshow(
+        corr,
+        text_auto=True,
+        color_continuous_scale="RdBu_r",
+        title="수치형 컬럼 간 상관관계",
+        aspect="auto"
+    )
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white"),
+        title_font=dict(color="white")
+    )
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.warning("⚠️ 수치형 컬럼이 부족하여 상관관계를 계산할 수 없습니다.")
+
+# --- 선택형 산점도 분석 ---
+st.markdown("---")
+st.subheader("🎯 특정 변수 간 관계 시각화")
+
+numeric_columns = numeric_df.columns.tolist()
+
+if len(numeric_columns) >= 2:
+    x_axis = st.selectbox("X축 변수 선택", numeric_columns)
+    y_axis = st.selectbox("Y축 변수 선택", numeric_columns, index=1)
+
+    fig2 = px.scatter(
+        df, x=x_axis, y=y_axis,
+        trendline="ols",
+        color_discrete_sequence=["#38bdf8"]
+    )
+    fig2.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white"),
+        title_font=dict(color="white")
+    )
+    st.plotly_chart(fig2, use_container_width=True)
+else:
+    st.info("📊 상관 분석을 위해 최소 2개 이상의 수치형 컬럼이 필요합니다.")
