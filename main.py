@@ -93,8 +93,10 @@ with tab2:
     numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
 
-    # ✅ X축만 선택하도록 변경
-    x_axis = st.sidebar.selectbox("X축 (범주형)", categorical_columns)
+    # ✅ X축만 선택하도록 변경 (title 제거)
+    x_axis_options = [col for col in categorical_columns if col.lower() != "title"]
+    x_axis = st.sidebar.selectbox("X축 (범주형)", x_axis_options)
+
     y_axis = "Installs" if "Installs" in numeric_columns else numeric_columns[0]  # 기본값 자동 선택
 
     chart_type = st.sidebar.radio("그래프 유형", ["막대 그래프", "산점도", "상자그림"])
@@ -170,6 +172,3 @@ with tab3:
         - X축을 `Category`로 두면 인기 장르를 쉽게 비교할 수 있습니다.  
         - `Rating`과 `Reviews`를 비교하면 평점과 리뷰의 상관관계를 시각적으로 확인할 수 있습니다.
         """)
-
-st.markdown("---")
-st.markdown("✨ *개발: 정보통신 기술부 | 시각화: Streamlit & Plotly*")
