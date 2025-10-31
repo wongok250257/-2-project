@@ -9,31 +9,24 @@ st.set_page_config(
     page_icon="🎮",
 )
 
-# --- CSS 스타일 (간지나게) ---
+# --- CSS 스타일 (다크톤 + 간지) ---
 st.markdown("""
 <style>
-/* 전체 배경: 검정+남색+보라 그라데이션 */
 .stApp {
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-/* 제목 스타일 */
 h1, h2, h3 {
     color: #8c61ff !important;
     text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
 }
-
-/* 카드 느낌 박스 */
 .stDataFrame, .stExpander {
     background: rgba(20, 20, 40, 0.7);
     border-radius: 12px;
     padding: 10px;
     border: 1px solid rgba(140, 97, 255,0.5);
 }
-
-/* 사이드바 스타일 */
 section[data-testid="stSidebar"] {
     background-color: #1e1b4b;
     border-right: 2px solid #302b63;
@@ -41,8 +34,6 @@ section[data-testid="stSidebar"] {
 section[data-testid="stSidebar"] * {
     color: #8c61ff !important;
 }
-
-/* 드롭다운, 라디오 버튼 */
 div[data-baseweb="select"] > div {
     background-color: #2b2a5f !important;
     border: 1px solid #8c61ff !important;
@@ -62,6 +53,7 @@ df = load_data()
 
 # --- 제목 ---
 st.title("🎮 Android 게임 데이터 대시보드")
+st.markdown("##### Streamlit + Plotly | Dark Purple & Blue Theme")
 
 # --- 탭 구성 ---
 tab1, tab2, tab3 = st.tabs(["📄 데이터 요약", "📊 시각화", "💡 인사이트"])
@@ -96,6 +88,7 @@ with tab2:
     x_axis_options = [col for col in categorical_columns if col.lower() != "title"]
     x_axis = st.sidebar.selectbox("X축 (범주형)", x_axis_options)
 
+    # y축 기본값: Installs 없으면 첫 숫자형 컬럼
     y_axis = "Installs" if "Installs" in numeric_columns else numeric_columns[0]
 
     chart_type = st.sidebar.radio("그래프 유형", ["막대 그래프", "산점도", "상자그림"])
@@ -108,7 +101,7 @@ with tab2:
         fig = px.bar(
             df_sorted, x=x_axis, y=y_axis, color=y_axis,
             text=y_axis,
-            color_continuous_scale=px.colors.sequential.Purple,
+            color_continuous_scale=px.colors.sequential.Purples,
             template="plotly_dark"
         )
         fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
