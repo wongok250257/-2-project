@@ -27,10 +27,23 @@ st.markdown("""
         background-color: rgba(255,255,255,0.05);
         border-radius: 10px;
     }
-    /* 사이드바 배경 */
+    /* 사이드바 배경 및 글씨 */
     section[data-testid="stSidebar"] {
         background-color: #0f172a;
         border-right: 2px solid #334155;
+        color: white;
+    }
+    /* 사이드바 내 텍스트, 라벨, 버튼, 셀렉트박스 글자색 */
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    /* selectbox, radio 버튼 등 테두리 */
+    div[data-baseweb="select"] > div {
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
+    }
+    div[data-baseweb="radio"] label {
+        color: white !important;
     }
     </style>
 """, unsafe_allow_html=True)
