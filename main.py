@@ -9,44 +9,48 @@ st.set_page_config(
     page_icon="🎮",
 )
 
-# --- CSS 스타일 ---
+# --- CSS 스타일 (간지나게 꾸미기) ---
 st.markdown("""
-    <style>
-    /* 전체 배경 및 텍스트 색상 */
-    .stApp {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        color: white;
-    }
+<style>
+/* 전체 배경 */
+.stApp {
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-    /* 제목 색상 */
-    h1, h2, h3 {
-        color: #38bdf8 !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    }
+/* 제목 스타일 */
+h1, h2, h3 {
+    color: #00f0ff !important;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+}
 
-    /* 모든 텍스트를 흰색으로 통일 */
-    .stMarkdown, .stText, .stDataFrame, div, p, label, span {
-        color: white !important;
-    }
+/* 카드 느낌 박스 */
+.stDataFrame, .stExpander {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
 
-    /* 사이드바 스타일 */
-    section[data-testid="stSidebar"] {
-        background-color: #0f172a;
-        border-right: 2px solid #334155;
-    }
-    section[data-testid="stSidebar"] * {
-        color: white !important;
-    }
+/* 사이드바 스타일 */
+section[data-testid="stSidebar"] {
+    background-color: #1a2a3a;
+    border-right: 2px solid #334155;
+}
+section[data-testid="stSidebar"] * {
+    color: #00f0ff !important;
+}
 
-    /* 드롭다운, 라디오 버튼, 셀렉트박스 배경 */
-    div[data-baseweb="select"] > div {
-        background-color: #1e293b !important;
-        border: 1px solid #334155 !important;
-    }
-    div[data-baseweb="radio"] label {
-        color: white !important;
-    }
-    </style>
+/* 드롭다운, 라디오 버튼 */
+div[data-baseweb="select"] > div {
+    background-color: #203a43 !important;
+    border: 1px solid #00f0ff !important;
+}
+div[data-baseweb="radio"] label {
+    color: #00f0ff !important;
+}
+</style>
 """, unsafe_allow_html=True)
 
 # --- 데이터 불러오기 ---
@@ -58,7 +62,7 @@ df = load_data()
 
 # --- 제목 ---
 st.title("🎮 Android 게임 데이터 대시보드")
-st.markdown("##### Streamlit + Plotly를 활용한 Android 게임 데이터 시각화")
+st.markdown("##### Streamlit + Plotly로 만든 간지나는 Android 게임 시각화")
 
 # --- 탭 구성 ---
 tab1, tab2, tab3 = st.tabs(["📄 데이터 요약", "📊 시각화", "💡 인사이트"])
@@ -80,8 +84,7 @@ with tab1:
     st.markdown("---")
     st.write("""
     이 데이터는 Android 게임의 다양한 특성을 포함하고 있습니다.  
-    예를 들어 다운로드 수, 평점, 리뷰 수, 카테고리 등의 정보가 있습니다.  
-    이를 바탕으로 어떤 게임이 인기가 많은지, 어떤 요소가 다운로드에 영향을 주는지 등을 분석할 수 있습니다.
+    다운로드 수, 평점, 리뷰 수, 카테고리 등의 정보를 기반으로 인기 게임 분석 가능.
     """)
 
 # ==============================
@@ -93,39 +96,41 @@ with tab2:
     numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
 
-    # ✅ X축만 선택하도록 변경 (title 제거)
+    # title 컬럼 제외
     x_axis_options = [col for col in categorical_columns if col.lower() != "title"]
     x_axis = st.sidebar.selectbox("X축 (범주형)", x_axis_options)
 
-    y_axis = "Installs" if "Installs" in numeric_columns else numeric_columns[0]  # 기본값 자동 선택
+    y_axis = "Installs" if "Installs" in numeric_columns else numeric_columns[0]
 
     chart_type = st.sidebar.radio("그래프 유형", ["막대 그래프", "산점도", "상자그림"])
 
     st.subheader(f"📊 {chart_type} : {x_axis} vs {y_axis}")
 
-    # --- 그래프 종류별 생성 ---
+    # --- 그래프 생성 ---
     if chart_type == "막대 그래프":
         df_sorted = df.sort_values(by=y_axis, ascending=False)
         fig = px.bar(
-            df_sorted, x=x_axis, y=y_axis, color=x_axis,
+            df_sorted, x=x_axis, y=y_axis, color=y_axis,
             text=y_axis,
-            color_discrete_sequence=px.colors.qualitative.Pastel,
-            template="plotly_white"
+            color_continuous_scale=px.colors.sequential.Turbo,
+            template="plotly_dark"
         )
         fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
 
     elif chart_type == "산점도":
         fig = px.scatter(
-            df, x=x_axis, y=y_axis, color=x_axis,
-            color_discrete_sequence=px.colors.qualitative.Pastel,
-            template="plotly_white"
+            df, x=x_axis, y=y_axis, color=y_axis,
+            color_continuous_scale=px.colors.sequential.Viridis,
+            template="plotly_dark",
+            size=y_axis,
+            hover_data=df.columns
         )
 
     else:  # 상자그림
         fig = px.box(
-            df, x=x_axis, y=y_axis, color=x_axis,
-            color_discrete_sequence=px.colors.qualitative.Pastel,
-            template="plotly_white"
+            df, x=x_axis, y=y_axis, color=y_axis,
+            color_continuous_scale=px.colors.sequential.Plasma,
+            template="plotly_dark"
         )
 
     # --- 그래프 스타일 ---
@@ -164,11 +169,11 @@ with tab3:
         st.markdown("---")
         st.write("""
         📈 **요약:**  
-        전체적으로 상위 소수의 게임이 높은 평점과 다운로드 수를 차지하고 있습니다.  
-        리뷰 수와 다운로드 수의 상관관계가 강하게 나타나는 경향이 있으며,  
-        인기 장르는 그래프에서 선택적으로 비교해볼 수 있습니다.  
+        상위 소수의 게임이 높은 평점과 다운로드 수를 차지합니다.  
+        리뷰 수와 다운로드 수의 상관관계가 강하게 나타나며,  
+        인기 장르는 그래프에서 쉽게 비교 가능.
 
-        🎯 **활용 팁:**  
-        - X축을 `Category`로 두면 인기 장르를 쉽게 비교할 수 있습니다.  
-        - `Rating`과 `Reviews`를 비교하면 평점과 리뷰의 상관관계를 시각적으로 확인할 수 있습니다.
+        🎯 **팁:**  
+        - X축을 `Category`로 두면 인기 장르 비교 가능  
+        - `Rating`과 `Reviews`를 비교하면 평점과 리뷰 관계 확인 가능
         """)
