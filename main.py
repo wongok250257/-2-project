@@ -93,8 +93,10 @@ with tab2:
     numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
 
+    # ✅ X축만 선택하도록 변경
     x_axis = st.sidebar.selectbox("X축 (범주형)", categorical_columns)
-    y_axis = st.sidebar.selectbox("Y축 (숫자형)", numeric_columns)
+    y_axis = "Installs" if "Installs" in numeric_columns else numeric_columns[0]  # 기본값 자동 선택
+
     chart_type = st.sidebar.radio("그래프 유형", ["막대 그래프", "산점도", "상자그림"])
 
     st.subheader(f"📊 {chart_type} : {x_axis} vs {y_axis}")
@@ -109,12 +111,14 @@ with tab2:
             template="plotly_white"
         )
         fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+
     elif chart_type == "산점도":
         fig = px.scatter(
             df, x=x_axis, y=y_axis, color=x_axis,
             color_discrete_sequence=px.colors.qualitative.Pastel,
             template="plotly_white"
         )
+
     else:  # 상자그림
         fig = px.box(
             df, x=x_axis, y=y_axis, color=x_axis,
@@ -163,7 +167,7 @@ with tab3:
         인기 장르는 그래프에서 선택적으로 비교해볼 수 있습니다.  
 
         🎯 **활용 팁:**  
-        - X축을 `Category`로 두고 Y축을 `Installs`로 설정하면 인기 장르를 쉽게 비교할 수 있습니다.  
+        - X축을 `Category`로 두면 인기 장르를 쉽게 비교할 수 있습니다.  
         - `Rating`과 `Reviews`를 비교하면 평점과 리뷰의 상관관계를 시각적으로 확인할 수 있습니다.
         """)
 
