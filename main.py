@@ -62,7 +62,6 @@ df = load_data()
 
 # --- 제목 ---
 st.title("🎮 Android 게임 데이터 대시보드")
-st.markdown("##### Streamlit + Plotly | Dark Purple & Blue Theme")
 
 # --- 탭 구성 ---
 tab1, tab2, tab3 = st.tabs(["📄 데이터 요약", "📊 시각화", "💡 인사이트"])
