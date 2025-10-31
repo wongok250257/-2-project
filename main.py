@@ -103,24 +103,30 @@ with tab1:
 with tab2:
     st.sidebar.header("⚙️ 시각화 설정")
 
-    # X축은 Installs만
-    x_axis = "Installs"
-    y_axis = st.sidebar.selectbox("Y축 (숫자형)", df.select_dtypes(include=['int64','float64']).columns.tolist())
+    numeric_columns = df.select_dtypes(include=['int64','float64']).columns.tolist()
+    categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
 
-    st.subheader(f"📊 막대 그래프 : {x_axis} vs {y_axis}")
+    x_axis = st.sidebar.selectbox("X축 (범주형)", categorical_columns)
+    y_axis = st.sidebar.selectbox("Y축 (숫자형)", numeric_columns)
+    chart_type = st.sidebar.radio("그래프 유형", ["막대 그래프", "산점도", "상자그림"])
 
-    # 막대 그래프
-    df_sorted = df.sort_values(by=y_axis, ascending=False)
-    fig = px.bar(
-        df_sorted,
-        x=x_axis,
-        y=y_axis,
-        color=x_axis,
-        text=y_axis,
-        color_discrete_sequence=px.colors.sequential.Plasma,
-        template="plotly_dark"
-    )
-    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    st.subheader(f"📊 {chart_type} : {x_axis} vs {y_axis}")
+
+    if chart_type == "막대 그래프":
+        df_sorted = df.sort_values(by=y_axis, ascending=False)
+        fig = px.bar(df_sorted, x=x_axis, y=y_axis, color=x_axis,
+                     text=y_axis,
+                     color_discrete_sequence=px.colors.sequential.Plasma,
+                     template="plotly_dark")
+        fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    elif chart_type == "산점도":
+        fig = px.scatter(df, x=x_axis, y=y_axis, color=x_axis,
+                         color_discrete_sequence=px.colors.sequential.Plasma,
+                         template="plotly_dark")
+    else:
+        fig = px.box(df, x=x_axis, y=y_axis, color=x_axis,
+                     color_discrete_sequence=px.colors.sequential.Plasma,
+                     template="plotly_dark")
 
     fig.update_layout(
         xaxis_title=None,
