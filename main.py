@@ -9,11 +9,10 @@ st.set_page_config(
     page_icon="🎮",
 )
 
-# --- CSS: 게임 UI 느낌 ---
+# --- CSS: 게임 UI 스타일 ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .stApp {
     background: linear-gradient(135deg, #0f172a, #1e3a8a, #4c1d95);
@@ -21,20 +20,21 @@ st.markdown("""
     color: #ffffff;
 }
 
-/* 제목 */
+/* 제목 h1, h2, h3: 게임 느낌 + 네온 */
 h1, h2, h3 {
+    font-family: 'Orbitron', sans-serif !important;
     color: #00f0ff !important;
     text-shadow: 2px 2px 8px #7f00ff;
-    font-family: 'Press Start 2P', cursive !important;
 }
 
 /* 일반 텍스트 */
 .stMarkdown, .stText, .stDataFrame, div, p, label, span {
+    font-family: 'Orbitron', sans-serif;
     color: #f0f9ff !important;
 }
 
-/* 탭 배경 카드 느낌 */
-.css-1d391kg {  /* Streamlit 탭 */
+/* 탭 카드 느낌 */
+.css-1d391kg {
     background-color: rgba(0,0,0,0.5);
     border-radius: 15px;
     padding: 10px;
@@ -44,7 +44,6 @@ h1, h2, h3 {
 section[data-testid="stSidebar"] {
     background-color: #1e3a8a;
     border-right: 2px solid #4c1d95;
-    color: #ffffff;
 }
 section[data-testid="stSidebar"] * {
     color: #ffffff !important;
@@ -69,21 +68,22 @@ div[data-baseweb="select"] > div, div[data-baseweb="radio"] label {
 </style>
 """, unsafe_allow_html=True)
 
-# --- 데이터 ---
+# --- 데이터 불러오기 ---
 @st.cache_data
 def load_data():
     return pd.read_csv("android-games.csv")
+
 df = load_data()
 
 # --- 제목 ---
 st.title("🎮 Android 게임 데이터 대시보드")
 st.markdown("##### 게임 느낌으로 보는 Android 게임 데이터 시각화")
 
-# --- 탭 ---
+# --- 탭 구성 ---
 tab1, tab2, tab3 = st.tabs(["📄 데이터 요약", "📊 시각화", "💡 인사이트"])
 
 # ==============================
-# 데이터 요약
+# 📄 데이터 요약
 # ==============================
 with tab1:
     st.subheader("📋 데이터 개요")
@@ -96,13 +96,14 @@ with tab1:
         st.dataframe(df.head(), use_container_width=True)
 
 # ==============================
-# 시각화
+# 📊 시각화
 # ==============================
 with tab2:
     st.sidebar.header("⚙️ 시각화 설정")
+
     numeric_columns = df.select_dtypes(include=['int64','float64']).columns.tolist()
     categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
-    
+
     x_axis = st.sidebar.selectbox("X축 (범주형)", categorical_columns)
     y_axis = st.sidebar.selectbox("Y축 (숫자형)", numeric_columns)
     chart_type = st.sidebar.radio("그래프 유형", ["막대 그래프", "산점도", "상자그림"])
@@ -120,7 +121,7 @@ with tab2:
         fig = px.scatter(df, x=x_axis, y=y_axis, color=x_axis,
                          color_discrete_sequence=px.colors.sequential.Blues,
                          template="plotly_dark")
-    else:
+    else:  # 상자그림
         fig = px.box(df, x=x_axis, y=y_axis, color=x_axis,
                      color_discrete_sequence=px.colors.sequential.Blues,
                      template="plotly_dark")
@@ -129,7 +130,7 @@ with tab2:
         xaxis_title=None,
         yaxis_title=y_axis,
         font=dict(color="#ffffff", family="Orbitron"),
-        title_font=dict(color="#00f0ff", family="Press Start 2P"),
+        title_font=dict(color="#00f0ff", family="Orbitron"),
         legend_title_font=dict(color="#ffffff"),
         legend_font=dict(color="#ffffff"),
         paper_bgcolor="rgba(0,0,0,0)",
@@ -138,7 +139,7 @@ with tab2:
     st.plotly_chart(fig, use_container_width=True)
 
 # ==============================
-# 인사이트
+# 💡 인사이트
 # ==============================
 with tab3:
     st.subheader("💡 데이터 인사이트")
