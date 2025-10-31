@@ -1,3 +1,5 @@
-streamlit
-pandas
-plotly
+streamlit>=1.24.0
+pandas>=1.5.0
+plotly>=5.15.0
+numpy>=1.24.0       # 데이터 처리 속도 향상
+openpyxl>=3.1.0     # 엑셀 파일 불러오기 지원
