@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --- 기본 설정 ---
+# --- 페이지 기본 설정 ---
 st.set_page_config(
-    page_title="Android 게임 데이터 시각화",
+    page_title="🎮 Android 게임 데이터 대시보드",
     layout="wide",
     page_icon="🎮",
 )
@@ -12,22 +12,33 @@ st.set_page_config(
 # --- CSS 스타일 ---
 st.markdown("""
     <style>
+    /* 전체 배경 및 텍스트 색상 */
     .stApp {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         color: white;
     }
+
+    /* 제목 색상 */
     h1, h2, h3 {
         color: #38bdf8 !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
     }
+
+    /* 모든 텍스트를 흰색으로 통일 */
+    .stMarkdown, .stText, .stDataFrame, div, p, label, span {
+        color: white !important;
+    }
+
+    /* 사이드바 스타일 */
     section[data-testid="stSidebar"] {
         background-color: #0f172a;
         border-right: 2px solid #334155;
-        color: white;
     }
     section[data-testid="stSidebar"] * {
         color: white !important;
     }
+
+    /* 드롭다운, 라디오 버튼, 셀렉트박스 배경 */
     div[data-baseweb="select"] > div {
         background-color: #1e293b !important;
         border: 1px solid #334155 !important;
@@ -38,10 +49,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 제목 ---
-st.title("🎮 Android 게임 데이터 대시보드")
-st.markdown("##### Plotly + Streamlit으로 만드는 게임 데이터 시각화")
-
 # --- 데이터 불러오기 ---
 @st.cache_data
 def load_data():
@@ -49,81 +56,116 @@ def load_data():
 
 df = load_data()
 
-# --- 기본 정보 표시 ---
-st.subheader("📄 데이터 개요")
-col1, col2, col3 = st.columns(3)
-col1.metric("총 데이터 개수", len(df))
-col2.metric("컬럼 수", len(df.columns))
-col3.metric("결측치 포함 여부", "✅ 없음" if df.isna().sum().sum() == 0 else "⚠️ 있음")
+# --- 제목 ---
+st.title("🎮 Android 게임 데이터 대시보드")
+st.markdown("##### Streamlit + Plotly를 활용한 Android 게임 데이터 시각화")
 
-st.write("**데이터 컬럼 목록:**", ", ".join(df.columns))
+# --- 탭 구성 ---
+tab1, tab2, tab3 = st.tabs(["📄 데이터 요약", "📊 시각화", "💡 인사이트"])
 
-# --- 미리보기 ---
-with st.expander("📋 데이터 미리보기 (클릭하여 보기)"):
-    st.dataframe(df.head(), use_container_width=True)
+# ==============================
+# 📄 1. 데이터 요약 탭
+# ==============================
+with tab1:
+    st.subheader("📋 데이터 개요")
 
-# --- 사이드바 ---
-st.sidebar.header("⚙️ 시각화 설정")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("총 데이터 수", len(df))
+    col2.metric("컬럼 개수", len(df.columns))
+    col3.metric("결측치 포함 여부", "✅ 없음" if df.isna().sum().sum() == 0 else "⚠️ 있음")
 
-numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
+    with st.expander("🔍 데이터 미리보기"):
+        st.dataframe(df.head(), use_container_width=True)
 
-x_axis = st.sidebar.selectbox("X축 (범주형)", categorical_columns)
-y_axis = st.sidebar.selectbox("Y축 (숫자형)", numeric_columns)
+    st.markdown("---")
+    st.write("""
+    이 데이터는 Android 게임의 다양한 특성을 포함하고 있습니다.  
+    예를 들어 다운로드 수, 평점, 리뷰 수, 카테고리 등의 정보가 있습니다.  
+    이를 바탕으로 어떤 게임이 인기가 많은지, 어떤 요소가 다운로드에 영향을 주는지 등을 분석할 수 있습니다.
+    """)
 
-chart_type = st.sidebar.radio(
-    "그래프 유형 선택",
-    ["막대 그래프", "산점도", "상자그림"]
-)
+# ==============================
+# 📊 2. 시각화 탭
+# ==============================
+with tab2:
+    st.sidebar.header("⚙️ 시각화 설정")
 
-# --- 그래프 생성 ---
-st.subheader(f"📊 {chart_type} : {x_axis} vs {y_axis}")
+    numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
 
-if chart_type == "막대 그래프":
-    df_sorted = df.sort_values(by=y_axis, ascending=False)
-    fig = px.bar(
-        df_sorted, x=x_axis, y=y_axis, color=x_axis,
-        text=y_axis,
-        color_discrete_sequence=px.colors.qualitative.Pastel,
-        template="plotly_white",
-        title=f"{x_axis}별 {y_axis} 비교"
+    x_axis = st.sidebar.selectbox("X축 (범주형)", categorical_columns)
+    y_axis = st.sidebar.selectbox("Y축 (숫자형)", numeric_columns)
+    chart_type = st.sidebar.radio("그래프 유형", ["막대 그래프", "산점도", "상자그림"])
+
+    st.subheader(f"📊 {chart_type} : {x_axis} vs {y_axis}")
+
+    # --- 그래프 종류별 생성 ---
+    if chart_type == "막대 그래프":
+        df_sorted = df.sort_values(by=y_axis, ascending=False)
+        fig = px.bar(
+            df_sorted, x=x_axis, y=y_axis, color=x_axis,
+            text=y_axis,
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+            template="plotly_white"
+        )
+        fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    elif chart_type == "산점도":
+        fig = px.scatter(
+            df, x=x_axis, y=y_axis, color=x_axis,
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+            template="plotly_white"
+        )
+    else:  # 상자그림
+        fig = px.box(
+            df, x=x_axis, y=y_axis, color=x_axis,
+            color_discrete_sequence=px.colors.qualitative.Pastel,
+            template="plotly_white"
+        )
+
+    # --- 그래프 스타일 ---
+    fig.update_layout(
+        xaxis_title=None,
+        yaxis_title=y_axis,
+        font=dict(color="white"),
+        title_font=dict(color="white"),
+        legend_title_font=dict(color="white"),
+        legend_font=dict(color="white"),
+        margin=dict(l=30, r=30, t=60, b=30),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
     )
-    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
-elif chart_type == "산점도":
-    fig = px.scatter(
-        df, x=x_axis, y=y_axis, color=x_axis,
-        color_discrete_sequence=px.colors.qualitative.Pastel,
-        template="plotly_white",
-        title=f"{x_axis} vs {y_axis}"
-    )
-elif chart_type == "상자그림":
-    fig = px.box(
-        df, x=x_axis, y=y_axis, color=x_axis,
-        color_discrete_sequence=px.colors.qualitative.Pastel,
-        template="plotly_white",
-        title=f"{x_axis}별 {y_axis} 분포"
-    )
+    st.plotly_chart(fig, use_container_width=True)
 
-fig.update_layout(
-    xaxis_title=None,
-    yaxis_title=y_axis,
-    margin=dict(l=30, r=30, t=60, b=30),
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)"
-)
-st.plotly_chart(fig, use_container_width=True)
+    # --- 상위 10개 ---
+    st.subheader(f"🏆 {y_axis} 기준 상위 10개 {x_axis}")
+    top10 = df.sort_values(by=y_axis, ascending=False).head(10)
+    st.dataframe(top10[[x_axis, y_axis]], use_container_width=True)
 
-# --- 추가 섹션 : 상위 10개 데이터 ---
-st.subheader(f"🏆 {y_axis} 기준 상위 10개 {x_axis}")
-top10 = df.sort_values(by=y_axis, ascending=False).head(10)
-st.dataframe(top10[[x_axis, y_axis]], use_container_width=True)
+# ==============================
+# 💡 3. 인사이트 탭
+# ==============================
+with tab3:
+    st.subheader("💡 데이터 인사이트")
 
-# --- 간단한 인사이트 출력 ---
-st.subheader("💡 데이터 인사이트")
-if not df.empty:
-    max_val = df[y_axis].max()
-    max_item = df.loc[df[y_axis].idxmax(), x_axis]
-    st.write(f"➡️ **'{max_item}'** 이(가) `{y_axis}` 값이 가장 높습니다. (최대값: **{max_val}**)")
+    if not df.empty:
+        numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
+        for col in numeric_cols:
+            max_val = df[col].max()
+            min_val = df[col].min()
+            mean_val = df[col].mean()
+            st.write(f"- **{col}** → 최고값: {max_val:.2f}, 최저값: {min_val:.2f}, 평균: {mean_val:.2f}")
+
+        st.markdown("---")
+        st.write("""
+        📈 **요약:**  
+        전체적으로 상위 소수의 게임이 높은 평점과 다운로드 수를 차지하고 있습니다.  
+        리뷰 수와 다운로드 수의 상관관계가 강하게 나타나는 경향이 있으며,  
+        인기 장르는 그래프에서 선택적으로 비교해볼 수 있습니다.  
+
+        🎯 **활용 팁:**  
+        - X축을 `Category`로 두고 Y축을 `Installs`로 설정하면 인기 장르를 쉽게 비교할 수 있습니다.  
+        - `Rating`과 `Reviews`를 비교하면 평점과 리뷰의 상관관계를 시각적으로 확인할 수 있습니다.
+        """)
 
 st.markdown("---")
-st.markdown("📊 **Tip:** 사이드바에서 축을 바꾸면 다양한 관계를 바로 시각화할 수 있습니다.")
+st.markdown("✨ *개발: 정보통신 기술부 | 시각화: Streamlit & Plotly*")
